@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 import dash_bootstrap_components as dbc
 
-app = Dash(external_stylesheets=[dbc.themes.SANDSTONE])
+app = Dash(external_stylesheets=[dbc.themes.SANDSTONE], host='0.0.0.0')
 
 df = pd.read_csv("/files/stats.csv")
 df_table = df.copy()[df.event==df.event.max()][["player_name", "total_points"]]

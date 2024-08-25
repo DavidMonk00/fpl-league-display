@@ -1,0 +1,19 @@
+services:
+  webapp:
+    image: ghcr.io/davidmonk00/fpl-league-display-webapp:master
+    ports: 
+      - 8050:8050
+    volumes:
+      - stats-files:/files
+  
+  scraper:
+    image: ghcr.io/davidmonk00/fpl-league-display-scraper:master
+    volumes:
+      - stats-files:/files
+    environment:
+      BASE_URL: https://fantasy.premierleague.com/api
+      STATS_PATH: /files
+      LEAGUE_ID: 853776
+
+volumes:
+  stats-files:
