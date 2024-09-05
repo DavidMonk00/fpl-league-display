@@ -7,6 +7,7 @@ services:
       - stats-files:/files
     environment:
       STATS_PATH: /files
+    command: gunicorn app:server --worker-connections 4
   
   scraper:
     image: ghcr.io/davidmonk00/fpl-league-display-scraper:master
