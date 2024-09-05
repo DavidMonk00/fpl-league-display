@@ -19,7 +19,7 @@ services:
     command: tail -f /dev/null
     labels:
       ofelia.enabled: "true"
-      ofelia.job-exec.datecron.schedule: "@every 30s"
+      ofelia.job-exec.datecron.schedule: "@hourly"
       ofelia.job-exec.datecron.command: "python /main.py"
   
   ofelia:

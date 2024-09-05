@@ -34,7 +34,11 @@ def serve_layout():
             dbc.Col(dcc.Graph(figure=px.line(
                 df, x='event', y='points_off_top', color='player_name',
                 labels={'event': 'Week', 'points_off_top': 'Points Off Top', 'player_name': "Player"}
-            )), width=6)
+            ))),
+            dbc.Col([
+                dcc.Dropdown(["Mean", "Standard Deviation"], "Mean", id='average-points-dropdown-selection'),
+                dcc.Graph(id="average-points-graph")
+            ])     
         ]),
         dbc.Row([
             html.H2("Ranking")
@@ -65,7 +69,7 @@ def serve_layout():
     Output('finance-graph', 'figure'),
     Input('finance-dropdown-selection', 'value')
 )
-def update_graph(value):
+def update_finance_graph(value):
     df = pd.read_csv(f"{os.getenv('STATS_PATH')}/stats.csv")
     match value:
         case "Total Value":
@@ -91,6 +95,29 @@ def update_graph(value):
             return px.line(
                 dff, x='event', y='value_mil', color='player_name',
                 labels={'event': 'Week', 'value_mil': 'Total Value (m)', 'player_name': "Player"}
+            )
+            
+@callback(
+    Output('average-points-graph', 'figure'),
+    Input('average-points-dropdown-selection', 'value')
+)
+def update_average_points_graph(value):
+    df = pd.read_csv(f"{os.getenv('STATS_PATH')}/gw.csv")
+    match value:
+        case "Mean":
+            return px.line(
+                df, x="gw", y="mean", color="player_name",
+                labels={"gw": "Week", "mean": "Mean Points per Player", 'player_name': "Player"}
+            )
+        case "Standard Deviation":
+            return px.line(
+                df, x="gw", y="std", color="player_name",
+                labels={"gw": "Week", "std": "Standard Deviation", 'player_name': "Player"}
+            )
+        case _:
+            return px.line(
+                df, x="gw", y="mean", color="player_name",
+                labels={"gw": "Week", "mean": "Mean Points per Player", 'player_name': "Player"}
             )
             
 app.layout = serve_layout
