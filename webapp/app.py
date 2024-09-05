@@ -5,7 +5,7 @@ import dash_bootstrap_components as dbc
 import os
 
 app = Dash(external_stylesheets=[dbc.themes.SANDSTONE])
-
+server = app.server
 
 def serve_layout():
     df = pd.read_csv(f"{os.getenv('STATS_PATH')}/stats.csv")
