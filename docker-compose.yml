@@ -5,6 +5,8 @@ services:
       - 8050:8050
     volumes:
       - stats-files:/files
+    environment:
+      STATS_PATH: /files
   
   scraper:
     image: ghcr.io/davidmonk00/fpl-league-display-scraper:master
@@ -14,6 +16,18 @@ services:
       BASE_URL: https://fantasy.premierleague.com/api
       STATS_PATH: /files
       LEAGUE_ID: 853776
+    command: tail -f /dev/null
+    labels:
+      ofelia.enabled: "true"
+      ofelia.job-exec.datecron.schedule: "@every 30s"
+      ofelia.job-exec.datecron.command: "python /main.py"
+  
+  ofelia:
+    image: mcuadros/ofelia:latest
+    command: daemon --docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
 
 volumes:
   stats-files:
