@@ -35,7 +35,10 @@ def getTeamPoints(team, gw):
         player = deepcopy(entry)
         player_data = requests.get(f"https://fantasy.premierleague.com/api/element-summary/{entry['element']}/").json()
         player_df = pd.DataFrame(player_data["history"])
-        player["points"] = player_df[player_df["round"] == gw].iloc[0].total_points * entry["multiplier"]
+        try:
+            player["points"] = player_df[player_df["round"] == gw].iloc[0].total_points * entry["multiplier"]
+        except IndexError:
+            player["points"] = 0
         points.append(player)
     return pd.DataFrame(points)
 
