@@ -44,8 +44,8 @@ def serve_layout():
             html.H2("Ranking")
         ]),
         dbc.Row([
-            dbc.Col(dcc.Graph(figure=px.bar(
-                df, x='event', y='rank', color='player_name', barmode='group', log_y=True,
+            dbc.Col(dcc.Graph(figure=px.scatter(
+                df, x='event', y='rank', color='player_name', log_y=True,
                 labels={'event': 'Week', 'rank': 'Gameweek Rank', 'player_name': "Player"}
             ))),
             dbc.Col(dcc.Graph(figure=px.line(
