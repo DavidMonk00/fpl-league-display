@@ -75,8 +75,8 @@ def main():
     gw_stats_concat = pd.concat(gw_stats, axis=0, ignore_index=True)
     gw_stats_concat.to_csv(f"{os.getenv('STATS_PATH')}/gw.csv")
     logging.info("Gameweek stats written to %s/gw.csv", os.getenv('STATS_PATH'))
-    
-    with open(f"{os.getenv('STATS_PATH')}/bootstrap_static.json", encoding='ascii') as f:
+
+    with open(f"{os.getenv('STATS_PATH')}/bootstrap_static.json", "w", encoding='ascii') as f:
         json.dump(bootstrap_static.data, f)
 
 
