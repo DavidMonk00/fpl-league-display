@@ -1,3 +1,6 @@
 requests
 pandas
 numpy
+dash
+plotly
+dash-bootstrap-components
