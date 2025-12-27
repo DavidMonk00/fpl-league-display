@@ -31,9 +31,10 @@ class League:
             player["multiplied_event_points"] = pick["multiplier"] * player["event_points"]
             player["is_captain"] = pick["is_captain"]
             player["is_vice_captain"] = pick["is_vice_captain"]
+            player["element"] = pick["element"]
             player_data.append(player)
         df = pd.DataFrame(player_data)
-        return df[['web_name', 'multiplied_event_points', 'team', 'is_captain', 'is_vice_captain']]
+        return df[['web_name', 'multiplied_event_points', 'team', 'is_captain', 'is_vice_captain', 'element']]
 
     def getTeams(self) -> list[pd.DataFrame]:
         return [self.__buildEntryTeam(self.entries.loc[i]) for i in range(len(self.entries))]
@@ -46,7 +47,7 @@ class League:
         teams = self.getTeams()
         for i in range(len(teams[0])):
             cells = []
-            for team in teams:
+            for j, team in enumerate(teams):
                 player = team.loc[i]
                 cell_class = ""
                 for match in matches_response:
@@ -68,7 +69,7 @@ class League:
                     dbc.Container(dbc.Row([
                         dbc.Col(f"{player.web_name}{captaincy}", class_name="text-end"),
                         dbc.Col(f"{player.multiplied_event_points}", width=2)
-                    ])), className=cell_class
+                    ])), className=cell_class, id={"type": "minileague-live-table-cell", "team": j, "index": int(player.element)}, n_clicks=0
                 ))
             row = html.Tr(cells)
             rows.append(row)
@@ -83,7 +84,7 @@ class League:
                 className="fw-bold"
             ))
         foot = html.Tr(cells)
-        return dbc.Table(table_header + table_body + [html.Tfoot(foot)], bordered=True)
+        return dbc.Table(table_header + table_body + [html.Tfoot(foot)], bordered=True, id="minileague-live-table")
     
     def getDataFrame(self):
         dataframes = []
