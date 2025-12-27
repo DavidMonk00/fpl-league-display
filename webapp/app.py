@@ -1,18 +1,21 @@
 import os
 from datetime import datetime
-from dash import Dash, Input, Output, callback, html, dcc
+from dash import Dash, Input, Output, callback, html, dcc, ALL, State, ctx
 import dash_bootstrap_components as dbc
 import plotly.express as px
 
 import pandas as pd
+import numpy as np
 
 from func import getMatches, isActive
 from league import League
 from static import BootstrapStatic
-
+from player import Player
 
 app = Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
+app.title = "FPL Dashboard"
+# app._favicon = "favicon-32x32.png"
 
 
 def buildMatchScoreline(bootstrap_static: BootstrapStatic, match) -> dbc.Container:
@@ -80,6 +83,41 @@ def buildLeagueTable():
     df_table = df.copy()[df.event==df.event.max()][["player_name", "total_points"]]
     df_table = df_table.rename(columns={"player_name": "Player", "total_points": "Total Points"})
     return df_table
+
+def buildPlayerModal(element=1):
+    bootstrap_static = BootstrapStatic()
+    current_gw = bootstrap_static.getCurrentGameweek()
+    player = Player(element)
+    player_static = player.getStaticInfo(bootstrap_static)
+    element_type = bootstrap_static.getElementType(player_static["element_type"])
+    team = bootstrap_static.getTeam(player_static["team"])
+    player_summary = player.getSummary()
+    stats = {}
+    total_points = 0
+    for gw in player_summary['history']:
+        if gw['round'] == current_gw:
+            for stat in player.useful_stats[player_static["element_type"]]:
+                stats[bootstrap_static.getStatLabel(stat)] = gw[stat]
+            total_points = gw["total_points"]
+            break
+    modal = [
+        dbc.ModalHeader(dbc.ModalTitle(f"{player_static['first_name']} {player_static['second_name']}")),
+        dbc.ModalBody(dbc.Container([
+            dbc.Row([
+                dbc.Col(html.H5(element_type['singular_name'])),
+                dbc.Col(html.H5(f"{player_static['now_cost']/10}m"), class_name="text-end")
+            ]),
+            dbc.Row([
+                dbc.Col(html.H6(team["name"])),
+                dbc.Col(html.H6(f"Points: {total_points}"), class_name="text-end")
+            ]),
+            dbc.Row([dbc.Table(html.Tbody([html.Tr([html.Td(name), html.Td(value)]) for name, value in stats.items()]), bordered=True)])
+        ])),
+        dbc.ModalFooter(
+            dbc.Button("Close", id="close", className="ms-auto", n_clicks=0)
+        ),
+    ]
+    return modal
 
 
 @callback(
@@ -175,6 +213,28 @@ def update_average_points_graph(value):
             )
 
 
+@app.callback(
+    [
+        Output("modal", "is_open"),
+        Output("close", "n_clicks"),
+        Output({"type": "minileague-live-table-cell", "team": ALL, "index": ALL}, 'n_clicks'),
+        Output("modal", "children")
+    ],
+    [
+        Input({"type": "minileague-live-table-cell", "team": ALL, "index": ALL}, 'n_clicks'),
+        Input("close", "n_clicks"),
+        Input("modal", "children")
+    ],
+    [State("modal", "is_open")],
+)
+def toggle_modal(n1, n2, modal, is_open):
+    if n2:
+        return [False, 0, list(np.zeros(len(n1))), modal]
+    if np.any(n1):
+        return [True, 0, list(np.zeros(len(n1))), buildPlayerModal(ctx.triggered_id["index"])]
+    return [is_open, 0, list(np.zeros(len(n1))), modal]
+
+
 def serve_layout():
     bootstrap_static = BootstrapStatic()
     current_gw = bootstrap_static.getCurrentGameweek()
@@ -184,7 +244,14 @@ def serve_layout():
 
     league_id = int(os.getenv("LEAGUE_ID"))
     league = League(league_id, bootstrap_static)
-    tab2_content = dbc.Container(league.buildGrid(), id="teams-container")
+    tab2_content = dbc.Container([
+        dbc.Container(league.buildGrid(), id="teams-container"),
+        dbc.Modal(
+            buildPlayerModal(),
+            id="modal",
+            is_open=False,
+        ),
+    ])
     
     df = pd.read_csv(f"{os.getenv('STATS_PATH')}/stats.csv")
     tab3_content = dbc.Container([

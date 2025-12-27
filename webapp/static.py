@@ -40,3 +40,9 @@ class BootstrapStatic:
             if team["id"] == code:
                 return team
         return {}
+    
+    def getElementType(self, element_type) -> dict:
+        for t in self.data["element_types"]:
+            if element_type == t["id"]:
+                return t
+        return {}
