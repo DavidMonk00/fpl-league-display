@@ -24,7 +24,7 @@ def buildMatchScoreline(bootstrap_static: BootstrapStatic, match) -> dbc.Contain
     away_team = bootstrap_static.getTeam(match["team_a"])
     p = inflect.engine()
     kickoff_obj = datetime.strptime(match["kickoff_time"], "%Y-%m-%dT%H:%M:%SZ")
-    time = kickoff_obj.strftime(f"%A {p.ordinal(kickoff_obj.strftime('%d'))} %B - %H:%M")
+    time = kickoff_obj.strftime(f"%a {p.ordinal(kickoff_obj.day)} %b - %H:%M")
     score = "v"
     score_style = "text-center"
     if match["started"] is True:
