@@ -3,3 +3,5 @@ plotly
 pandas
 dash-bootstrap-components
 gunicorn
+inflect
+numpy

@@ -6,6 +6,7 @@ import plotly.express as px
 
 import pandas as pd
 import numpy as np
+import inflect
 
 from func import getMatches, isActive
 from league import League
@@ -21,7 +22,9 @@ app.title = "FPL Dashboard"
 def buildMatchScoreline(bootstrap_static: BootstrapStatic, match) -> dbc.Container:
     home_team = bootstrap_static.getTeam(match["team_h"])
     away_team = bootstrap_static.getTeam(match["team_a"])
-    time = ""
+    p = inflect.engine()
+    kickoff_obj = datetime.strptime(match["kickoff_time"], "%Y-%m-%dT%H:%M:%SZ")
+    time = kickoff_obj.strftime(f"%A {p.ordinal(kickoff_obj.strftime('%d'))} %B - %H:%M")
     score = "v"
     score_style = "text-center"
     if match["started"] is True:
